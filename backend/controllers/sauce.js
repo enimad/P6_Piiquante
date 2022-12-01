@@ -37,24 +37,29 @@ exports.modifySauce = (req, res, next) => {
         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
     } : { ...req.body };
 
-    if (sauce.userId != req.auth.userId) {
-        res.status(401).json({ message: 'Non autorisé' });
+    Sauce.findOne({ _id: req.params.id })
+        .then(sauce => {
+            if (sauce.userId != req.auth.userId) {
+                res.status(401).json({ message: 'Non autorisé' });
+            } else {
+                if (req.file) {
+                    const filename = sauce.imageUrl.split('/images/')[1];
 
-    } else {
-        if (req.file) {
-            const filename = sauce.imageUrl.split('/images/')[1];
-
-            fs.unlink(`images/${filename}`, () => {
-                Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-                    .then(() => res.status(200).json({ message: 'Objet modifié !' }))
-                    .catch(error => res.status(401).json({ error }));
-            })
-        } else {
-            Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
-                .then(() => res.status(200).json({ message: 'Objet modifié !' }))
-                .catch(error => res.status(401).json({ error }));
-        }
-    }
+                    fs.unlink(`images/${filename}`, () => {
+                        Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+                            .then(() => res.status(200).json({ message: 'Objet modifié !' }))
+                            .catch(error => res.status(401).json({ error }));
+                    });
+                } else {
+                    Sauce.updateOne({ _id: req.params.id }, { ...sauceObject, _id: req.params.id })
+                        .then(() => res.status(200).json({ message: 'Objet modifié !' }))
+                        .catch(error => res.status(401).json({ error }));
+                }
+            }
+        })
+        .catch(error => {
+            res.status(500).json({ error });
+        });
 };
 
 exports.deleteSauce = (req, res, next) => {
