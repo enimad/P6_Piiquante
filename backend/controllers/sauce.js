@@ -85,13 +85,13 @@ exports.likeSauce = (req, res, next) => {
     Sauce.findOne({ _id: req.params.id })
         .then(sauce => {
             // // // CAS 1: LE USER LIKE LA SAUCE
-            if (req.body.like === 1) {
+            if (!sauce.usersLiked.includes(req.body.userId) && req.body.like === 1) {
                 Sauce.updateOne({ _id: req.params.id }, { $push: { usersLiked: req.body.userId }, $inc: { likes: 1 } })
                     .then(() => res.status(200).json({ message: 'Objet liké !' }))
                     .catch(error => res.status(401).json({ error }));
             }
             // // // CAS 2: LE USER DISLIKE LA SAUCE
-            else if (req.body.like === -1) {
+            else if (!sauce.usersDisliked.includes(req.body.userId) && req.body.like === -1) {
                 Sauce.updateOne({ _id: req.params.id }, { $push: { usersDisliked: req.body.userId }, $inc: { dislikes: 1 } })
                     .then(() => res.status(200).json({ message: 'Objet disliké !' }))
                     .catch(error => res.status(401).json({ error }));
