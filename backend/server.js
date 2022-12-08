@@ -18,5 +18,5 @@ mongoose
         })
     )
     // Arret du serveur si connection impossible
-    .catch(() => console.log("Server connection failed !"));
+    .catch((error) => console.log(error));
 
